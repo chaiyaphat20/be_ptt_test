@@ -2,7 +2,10 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 import { User } from 'src/user/schema/user.schema';
 
-export type RoomDocument = Room & Document;
+export type RoomDocument = Room & {
+  reservedSeats: string,
+  remainingSeats: string,
+};
 
 @Schema({ timestamps: true })
 export class Room {

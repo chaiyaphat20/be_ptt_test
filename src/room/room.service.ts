@@ -44,10 +44,18 @@ export class RoomService {
   }
 
 
-  async getRoomById(roomId: string): Promise<Room> {
+  async getRoomById(roomId: string, search?: string, sortBy?: string): Promise<RoomDocument> {
+    console.log(this.getSortOptions(sortBy))
     const room = await this.roomModel.findById(roomId).populate({
       path: 'users',
       select: 'firstName lastName phone -_id',
+      match: search ? {
+        $or: [
+          { firstName: new RegExp(search, 'i') },
+          { lastName: new RegExp(search, 'i') },
+        ],
+      } : {},
+      options: sortBy ? { sort: this.getSortOptions(sortBy) } : {},
     }).exec();
 
     if (!room) {
@@ -57,16 +65,27 @@ export class RoomService {
     const reservedSeats = room.users.length;
     const remainingSeats = room.limit - reservedSeats;
 
-    const roomWithCounts = {
+    return {
       _id: room._id,
       name: room.name,
       limit: room.limit,
       users: room.users,
-      reservedSeats: reservedSeats,
-      remainingSeats: remainingSeats,
+      reservedSeats: "" + reservedSeats,
+      remainingSeats: "" + remainingSeats,
     };
+  }
 
-    return roomWithCounts;
+  getSortOptions(sortBy: string) {
+    switch (sortBy) {
+      case 'firstName':
+        return { 'users.firstName': 1 };
+      case 'lastName':
+        return { 'users.lastName': 1 };
+      case 'createdDate':
+        return { createdAt: 1 };
+      default:
+        return {};
+    }
   }
 
   async setRoomLimit(roomId: string, newLimit: number): Promise<Room> {

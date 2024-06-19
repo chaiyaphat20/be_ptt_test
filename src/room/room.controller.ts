@@ -19,8 +19,12 @@ export class RoomController {
 
 
   @Get(':id')
-  async getRoomById(@Param('id') id: string): Promise<Room> {
-    return this.roomService.getRoomById(id);
+  async getRoomById(
+    @Param('id') id: string,
+    @Query('search') search?: string,
+    @Query('sortBy') sortBy?: string,
+  ): Promise<Room> {
+    return this.roomService.getRoomById(id, search, sortBy);
   }
 
   @Patch('limit/:roomId')
