@@ -17,7 +17,56 @@ export class RoomService {
   }
 
   async getRooms(): Promise<Room[]> {
-    return this.roomModel.find().exec();
+    const rooms = await this.roomModel.find().populate({
+      path: 'users',
+      select: 'firstName lastName phone -_id', // เลือกเฉพาะฟิลด์ firstName, lastName, phone และยกเว้น _id
+    }).exec();
+
+    // ประกาศตัวแปรเก็บข้อมูลที่นั่งทั้งหมดของแต่ละห้อง
+    const roomsWithCounts = await Promise.all(rooms.map(async (room: RoomDocument) => {
+      const reservedSeats = room.users.length; // จำนวนที่นั่งที่มีผู้ใช้จองแล้ว
+      const remainingSeats = room.limit - reservedSeats; // จำนวนที่นั่งคงเหลือ
+
+      // สร้าง object ใหม่ที่มีข้อมูลเพิ่มเติมเกี่ยวกับจำนวนที่นั่ง
+      const roomWithCounts = {
+        _id: room._id,
+        name: room.name,
+        limit: room.limit,
+        users: room.users,
+        reservedSeats: reservedSeats,
+        remainingSeats: remainingSeats,
+      };
+
+      return roomWithCounts;
+    }));
+
+    return roomsWithCounts;
+  }
+
+
+  async getRoomById(roomId: string): Promise<Room> {
+    const room = await this.roomModel.findById(roomId).populate({
+      path: 'users',
+      select: 'firstName lastName phone -_id',
+    }).exec();
+
+    if (!room) {
+      throw new NotFoundException('Room not found');
+    }
+
+    const reservedSeats = room.users.length;
+    const remainingSeats = room.limit - reservedSeats;
+
+    const roomWithCounts = {
+      _id: room._id,
+      name: room.name,
+      limit: room.limit,
+      users: room.users,
+      reservedSeats: reservedSeats,
+      remainingSeats: remainingSeats,
+    };
+
+    return roomWithCounts;
   }
 
   async setRoomLimit(roomId: string, newLimit: number): Promise<Room> {

@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Patch, Param } from '@nestjs/common';
+import { Controller, Post, Get, Body, Patch, Param, Query } from '@nestjs/common';
 import { RoomService } from './room.service';
 import { Room, RoomDocument } from './schema/room.shema';
 
@@ -12,8 +12,15 @@ export class RoomController {
   }
 
   @Get()
-  async getRooms(): Promise<Room[]> {
+  async getRooms(
+  ): Promise<Room[]> {
     return this.roomService.getRooms();
+  }
+
+
+  @Get(':id')
+  async getRoomById(@Param('id') id: string): Promise<Room> {
+    return this.roomService.getRoomById(id);
   }
 
   @Patch('limit/:roomId')
