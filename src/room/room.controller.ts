@@ -27,7 +27,7 @@ export class RoomController {
     return this.roomService.getRoomById(id, search, sortBy);
   }
 
-  @Patch('limit/:roomId')
+  @Post('limit/:roomId')
   async setRoomLimit(@Param('roomId') roomId: string, @Body('newLimit') newLimit: number): Promise<Room> {
     return this.roomService.setRoomLimit(roomId, newLimit);
   }

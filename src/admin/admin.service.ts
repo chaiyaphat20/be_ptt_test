@@ -32,6 +32,6 @@ export class AdminService {
       throw new NotFoundException('User or Password invalid');
     }
 
-    return admin;
+    return admin.toJSON();
   }
 }
