@@ -45,17 +45,19 @@ export class RoomService {
 
 
   async getRoomById(roomId: string, search?: string, sortBy?: string): Promise<RoomDocument> {
-    console.log(this.getSortOptions(sortBy))
+    const sortOptions = this.getSortOptions(sortBy);
+    console.log('Sort Options:', sortOptions);
+
     const room = await this.roomModel.findById(roomId).populate({
       path: 'users',
-      select: 'firstName lastName phone -_id',
+      select: 'firstName lastName phone createdAt -_id',
       match: search ? {
         $or: [
           { firstName: new RegExp(search, 'i') },
           { lastName: new RegExp(search, 'i') },
         ],
       } : {},
-      options: sortBy ? { sort: this.getSortOptions(sortBy) } : {},
+      options: { sort: sortOptions },
     }).exec();
 
     if (!room) {
@@ -77,12 +79,18 @@ export class RoomService {
 
   getSortOptions(sortBy: string) {
     switch (sortBy) {
-      case 'firstName':
-        return { 'users.firstName': 1 };
-      case 'lastName':
-        return { 'users.lastName': 1 };
-      case 'createdDate':
-        return { createdAt: 1 };
+      case 'firstNameAsc':
+        return { 'firstName': 1 };
+      case 'firstNameDesc':
+        return { 'firstName': -1 };
+      case 'lastNameAsc':
+        return { 'lastName': 1 };
+      case 'lastNameDesc':
+        return { 'lastName': -1 };
+      case 'createdDateAsc':
+        return { 'createdAt': 1 };
+      case 'createdDateDesc':
+        return { 'createdAt': -1 };
       default:
         return {};
     }
