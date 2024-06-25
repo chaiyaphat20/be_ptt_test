@@ -22,12 +22,10 @@ export class RoomService {
       select: 'firstName lastName phone -_id', // เลือกเฉพาะฟิลด์ firstName, lastName, phone และยกเว้น _id
     }).exec();
 
-    // ประกาศตัวแปรเก็บข้อมูลที่นั่งทั้งหมดของแต่ละห้อง
     const roomsWithCounts = await Promise.all(rooms.map(async (room: RoomDocument) => {
       const reservedSeats = room.users.length; // จำนวนที่นั่งที่มีผู้ใช้จองแล้ว
       const remainingSeats = room.limit - reservedSeats; // จำนวนที่นั่งคงเหลือ
 
-      // สร้าง object ใหม่ที่มีข้อมูลเพิ่มเติมเกี่ยวกับจำนวนที่นั่ง
       const roomWithCounts = {
         _id: room._id,
         name: room.name,
